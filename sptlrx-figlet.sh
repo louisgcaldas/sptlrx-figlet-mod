@@ -72,6 +72,50 @@ print_centered_ascii() {
     fi
     
     echo "$ASCII_OUTPUT"
+}print_centered_ascii() {
+    local text="$1"
+    [ -z "$text" ] && return
+
+    # Trata cedilha e remove acentos para garantir compatibilidade com fontes ASCII
+    text=$(echo "$text" | sed \
+        -e 's/ç/c/g' -e 's/Ç/C/g' \
+        -e 's/[áàãâä]/a/g' -e 's/[ÁÀÃÂÄ]/A/g' \
+        -e 's/[éèêë]/e/g' -e 's/[ÉÈÊË]/E/g' \
+        -e 's/[íìîï]/i/g' -e 's/[ÍÌÎÏ]/I/g' \
+        -e 's/[óòõôö]/o/g' -e 's/[ÓÒÕÔÖ]/O/g' \
+        -e 's/[úùûü]/u/g' -e 's/[ÚÙÛÜ]/U/g')
+
+    TERM_WIDTH=$(tput cols)
+    TERM_LINES=$(tput lines)
+    TEXT_LEN=${#text}
+
+    ESTIMATED_TUBES=$(( TEXT_LEN * 6 ))
+    ESTIMATED_SLANT=$(( TEXT_LEN * 4 ))
+
+    local chosen_font="small"
+
+    if [ $ESTIMATED_TUBES -lt $TERM_WIDTH ] && [ -f "$FONT_PATH" ]; then
+        chosen_font="tubes"
+    elif [ $ESTIMATED_SLANT -lt $TERM_WIDTH ]; then
+        chosen_font="slant"
+    fi
+
+    if [ "$chosen_font" = "tubes" ]; then
+        ASCII_OUTPUT=$(figlet -d "$FONT_DIR" -f tubes -w "$TERM_WIDTH" -c -s "$text" 2>/dev/null)
+    else
+        ASCII_OUTPUT=$(figlet -f "$chosen_font" -w "$TERM_WIDTH" -c -s "$text" 2>/dev/null)
+    fi
+
+    clear
+
+    ASCII_HEIGHT=$(echo "$ASCII_OUTPUT" | wc -l)
+    PADDING_TOP=$(( (TERM_LINES - ASCII_HEIGHT) / 2 ))
+
+    if [ $PADDING_TOP -gt 0 ]; then
+        printf '\n%.0s' $(seq 1 $PADDING_TOP)
+    fi
+
+    echo "$ASCII_OUTPUT"
 }
 
 redraw_on_resize() {
