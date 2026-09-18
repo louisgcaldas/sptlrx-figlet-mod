@@ -144,7 +144,7 @@ while true; do
             ')
 
             if [[ -z "$MATCHED_LINE" ]] || [[ "$MATCHED_LINE" =~ ^[[:space:]]*$ ]] || [[ "$MATCHED_LINE" == *"Instrumental"* ]] || [[ "$MATCHED_LINE" == *"♪"* ]]; then
-                NEW_LINE="~ ~ ~"
+                NEW_LINE="~ Instrumental ~"
             else
                 NEW_LINE="$MATCHED_LINE"
             fi
